@@ -1,7 +1,7 @@
 
 =================================================================
   API ATTACK SURFACE AUDITOR — SCAN REPORT
-  2026-07-09 19:22:20   http://localhost:3001
+  2026-07-09 17:24:36   http://localhost:3001
 =================================================================
 
   [CRITICAL]  SQL Injection
@@ -32,7 +32,7 @@
   OWASP    : API2:2023 — Broken Authentication
   Detail   : /api/health returns 200 with no token (intentionally public — accepted risk)
   Request  : GET http://localhost:3001/api/health  (no Authorization header)
-  Response : HTTP 200: {"status":"ok","timestamp":"2026-07-09T23:22:20.286Z","uptime":362728,"checks":{"database":"ok","jwt":"ok"}}
+  Response : HTTP 200: {"status":"ok","timestamp":"2026-07-09T21:24:35.895Z","uptime":355664,"checks":{"database":"ok","jwt":"ok"}}
 
   [SAFE]    BOLA/IDOR
   OWASP    : API1:2023 — Broken Object Level Authorization
