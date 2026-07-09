@@ -1,0 +1,26 @@
+
+=================================================================
+  MOVE MORE — SECURITY SCAN REPORT
+  2026-07-05 15:40:18   http://localhost:3001
+=================================================================
+
+  [VULNERABLE]  Missing Auth
+  Detail   : /api/health returns 200 with no token
+  Request  : GET http://localhost:3001/api/health  (no Authorization header)
+  Response : HTTP 200: {"status":"ok","timestamp":"2026-07-05T19:40:17.843Z","uptime":3801,"checks":{"database":"ok","jwt":"ok"}}
+
+  [VULNERABLE]  Missing Rate Limiting
+  Detail   : 50 rapid login attempts completed — no 429 returned
+  Request  : POST /api/auth/login x50, wrong credentials, no delay
+  Response : No 429 Too Many Requests received across 50 requests
+
+  [SAFE]        BOLA/IDOR
+
+  [SAFE]        JWT Attacks
+
+  [SAFE]        Mass Assignment
+
+=================================================================
+  Vulnerabilities found : 2
+  Checks passed         : 3
+=================================================================
