@@ -1,11 +1,11 @@
 """
 scanner/auth.py
-Missing authentication test — v6 update.
-Now uses discovered routes from api_map instead of hardcoded list.
-Falls back to FALLBACK_ROUTES if no spec was found.
+Tests every known endpoint with no Authorization header.
+Flags any endpoint that returns 200 — it should require a token.
+Async version — uses httpx.AsyncClient passed in from main.
 """
 
-FALLBACK_ROUTES = [
+KNOWN_ROUTES = [
     "/api/health",
     "/api/activities",
     "/api/notifications",
@@ -18,26 +18,20 @@ FALLBACK_ROUTES = [
     "/api/feed",
 ]
 
-PUBLIC_BY_DESIGN = {"/api/health", "/health", "/api/status"}
-SKIP_ROUTES = {"/api/auth/login", "/api/auth/register", "/api/auth/logout"}
+PUBLIC_BY_DESIGN = {"/api/health"}
 
 
-async def run(client, base_url, api_map, **kwargs):
-    routes = [
-        r for r in api_map.get("routes", FALLBACK_ROUTES)
-        if r not in SKIP_ROUTES
-    ]
-
-    print("\n[1/15] Missing authentication")
-    print(f"       Testing {len(routes)} discovered endpoints (no token)\n")
+async def run(client, base_url, **kwargs):
+    print("\n[1/8] Missing authentication")
+    print("      No token — expecting 401/403 on all protected routes\n")
 
     findings  = []
     vuln_found = False
 
-    for route in routes:
+    for route in KNOWN_ROUTES:
         try:
             r = await client.get(f"{base_url}{route}")
-            print(f"  GET {route:<40} → {r.status_code}")
+            print(f"  GET {route:<35} → {r.status_code}")
 
             if r.status_code == 200:
                 accepted_risk = route in PUBLIC_BY_DESIGN
@@ -56,7 +50,7 @@ async def run(client, base_url, api_map, **kwargs):
                 vuln_found = True
 
         except Exception as e:
-            print(f"  GET {route:<40} → ERROR: {e}")
+            print(f"  GET {route:<35} → ERROR: {e}")
 
     if not vuln_found:
         print("\n  ✓ All endpoints returned non-200 without a token")

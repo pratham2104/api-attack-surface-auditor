@@ -1,8 +1,6 @@
 """
 scanner/sqli.py
-SQL injection fuzzer — v6 update.
-Uses discovered endpoints and parameters from api_map
-instead of hardcoded route/param combinations.
+SQL injection fuzzer — async version.
 """
 
 import re
@@ -25,29 +23,12 @@ SQL_ERROR_PATTERNS = re.compile(
     re.IGNORECASE
 )
 
-FALLBACK_TARGETS = [
+TARGETS = [
     ("/api/auth/login",  "POST", {"employee_id": None, "password": None}),
     ("/api/activities",  "GET",  {"type": None, "limit": None}),
     ("/api/users",       "GET",  {"search": None, "id": None}),
     ("/api/leaderboard", "GET",  {"limit": None, "offset": None}),
 ]
-
-
-def _build_targets_from_api_map(api_map):
-    """Convert api_map endpoints into test targets."""
-    targets = []
-    for path, methods in api_map.get("endpoints", {}).items():
-        for method, op in methods.items():
-            if method not in ("GET", "POST", "PUT", "PATCH"):
-                continue
-            params = {
-                p["name"]: None
-                for p in op.get("parameters", [])
-                if p.get("in") in ("query", "body") and p.get("type") in ("string", "integer", None)
-            }
-            if params:
-                targets.append((path, method, params))
-    return targets[:6] if targets else None   # cap at 6 to keep scan fast
 
 
 async def _get_baseline(client, base_url, route, method, token_a):
@@ -68,21 +49,15 @@ async def _get_baseline(client, base_url, route, method, token_a):
         return None
 
 
-async def run(client, base_url, token_a, api_map, **kwargs):
-    targets = _build_targets_from_api_map(api_map)
-    if not targets:
-        targets = [(r, m, f) for r, m, f in FALLBACK_TARGETS]
-        print("\n[8/15] SQL injection  (using fallback route list)")
-    else:
-        print(f"\n[8/15] SQL injection  ({len(targets)} endpoints from spec)")
-
-    print("       Fuzzing discovered parameters with SQLi payloads\n")
+async def run(client, base_url, token_a, **kwargs):
+    print("\n[8/8] SQL injection")
+    print("      Fuzzing query params and body fields with SQLi payloads\n")
 
     findings  = []
     vuln_found = False
     last_r     = None
 
-    for route, method, fields in targets:
+    for route, method, fields in TARGETS:
         baseline_len = await _get_baseline(client, base_url, route, method, token_a)
         print(f"  {method} {route}")
 
@@ -141,7 +116,7 @@ async def run(client, base_url, token_a, api_map, **kwargs):
                     print(f"    ERROR: {e}")
 
         status = last_r.status_code if last_r else "N/A"
-        print(f"    Payloads sent — last status: {status}")
+        print(f"    Payloads sent — {status}")
 
     if not vuln_found:
         print("\n  ✓ No SQL injection indicators detected")

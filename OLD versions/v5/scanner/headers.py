@@ -1,7 +1,6 @@
 """
 scanner/headers.py
-Security headers audit — v6 update.
-Uses discovered routes from api_map for probe targets.
+Security headers audit — async version.
 """
 
 EXPECTED_HEADERS = {
@@ -13,33 +12,30 @@ EXPECTED_HEADERS = {
     "Permissions-Policy":         ("Low",    "Restricts browser features (camera, mic, geolocation)"),
 }
 
-FALLBACK_PROBE_ROUTES = ["/api/health", "/api/leaderboard", "/api/activities"]
+PROBE_ROUTES = ["/api/health", "/api/leaderboard", "/api/activities"]
 
 
-async def run(client, base_url, token_a, api_map, **kwargs):
-    # Use first 3 discovered routes as probe targets
-    probe_routes = api_map.get("routes", FALLBACK_PROBE_ROUTES)[:3]
+async def run(client, base_url, token_a, **kwargs):
+    print("\n[6/8] Security headers audit")
+    print("      Checking response headers across sampled endpoints\n")
 
-    print("\n[6/15] Security headers audit")
-    print(f"       Probing {len(probe_routes)} endpoints from discovered routes\n")
-
-    findings        = []
+    findings       = []
     missing_headers = {}
 
-    for route in probe_routes:
+    for route in PROBE_ROUTES:
         try:
             r = await client.get(
                 f"{base_url}{route}",
                 headers={"Authorization": f"Bearer {token_a}"}
             )
-            print(f"  GET {route:<40} → {r.status_code}")
+            print(f"  GET {route:<35} → {r.status_code}")
 
             for header in EXPECTED_HEADERS:
                 if header.lower() not in {k.lower() for k in r.headers}:
                     missing_headers.setdefault(header, []).append(route)
 
         except Exception as e:
-            print(f"  GET {route:<40} → ERROR: {e}")
+            print(f"  GET {route:<35} → ERROR: {e}")
 
     for header, routes in missing_headers.items():
         severity, reason = EXPECTED_HEADERS[header]

@@ -1,8 +1,8 @@
 """
 reporter/mitre_map.py
-Maps each scanner finding category to a MITRE ATT&CK technique.
-Data is hardcoded — no external API needed.
-Reference: https://attack.mitre.org
+Maps each scanner finding category to a MITRE ATT&CK technique
+and a CVSS v3.1 vector string with calculated numeric score.
+Reference: https://attack.mitre.org  |  https://www.first.org/cvss/
 """
 
 MITRE_MAP = {
@@ -11,139 +11,384 @@ MITRE_MAP = {
         "name":    "Exploit Public-Facing Application",
         "tactic":  "Initial Access",
         "url":     "https://attack.mitre.org/techniques/T1190/",
-        "summary": "Adversaries exploit weaknesses in internet-facing software to gain access."
+        "summary": "Adversaries exploit weaknesses in internet-facing software to gain access.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "cvss_score":  9.8,
     },
     "SQL Injection — Error Leak": {
         "id":      "T1190",
         "name":    "Exploit Public-Facing Application",
         "tactic":  "Initial Access",
         "url":     "https://attack.mitre.org/techniques/T1190/",
-        "summary": "Database error strings leaking in responses aid adversary reconnaissance."
+        "summary": "Database error strings leaking in responses aid adversary reconnaissance.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "cvss_score":  7.5,
     },
     "Missing Auth": {
         "id":      "T1078",
         "name":    "Valid Accounts",
         "tactic":  "Defense Evasion / Persistence",
         "url":     "https://attack.mitre.org/techniques/T1078/",
-        "summary": "Unauthenticated endpoints allow adversaries to access resources without credentials."
+        "summary": "Unauthenticated endpoints allow adversaries to access resources without credentials.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score":  5.3,
     },
     "Missing Rate Limiting": {
         "id":      "T1110",
         "name":    "Brute Force",
         "tactic":  "Credential Access",
         "url":     "https://attack.mitre.org/techniques/T1110/",
-        "summary": "No request throttling allows automated credential guessing at scale."
+        "summary": "No request throttling allows automated credential guessing at scale.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score":  5.3,
     },
     "JWT alg:none": {
         "id":      "T1528",
         "name":    "Steal Application Access Token",
         "tactic":  "Credential Access",
         "url":     "https://attack.mitre.org/techniques/T1528/",
-        "summary": "Forged unsigned tokens bypass authentication entirely."
+        "summary": "Forged unsigned tokens bypass authentication entirely.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "cvss_score":  10.0,
     },
     "JWT Role Tampering": {
         "id":      "T1134.001",
         "name":    "Token Impersonation/Theft",
         "tactic":  "Defense Evasion / Privilege Escalation",
         "url":     "https://attack.mitre.org/techniques/T1134/001/",
-        "summary": "Tampered token claims escalate attacker privileges without valid credentials."
+        "summary": "Tampered token claims escalate attacker privileges without valid credentials.",
+        "cvss_vector": "AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
+        "cvss_score":  9.9,
     },
     "JWT Attacks": {
         "id":      "T1528",
         "name":    "Steal Application Access Token",
         "tactic":  "Credential Access",
         "url":     "https://attack.mitre.org/techniques/T1528/",
-        "summary": "Token forgery allows impersonation of any user or role."
+        "summary": "Token forgery allows impersonation of any user or role.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "cvss_score":  10.0,
     },
     "BOLA/IDOR": {
         "id":      "T1083",
         "name":    "File and Directory Discovery",
         "tactic":  "Discovery",
         "url":     "https://attack.mitre.org/techniques/T1083/",
-        "summary": "Enumerating resource IDs exposes data belonging to other users."
+        "summary": "Enumerating resource IDs exposes data belonging to other users.",
+        "cvss_vector": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+        "cvss_score":  6.5,
     },
     "Mass Assignment": {
         "id":      "T1548",
         "name":    "Abuse Elevation Control Mechanism",
         "tactic":  "Privilege Escalation",
         "url":     "https://attack.mitre.org/techniques/T1548/",
-        "summary": "Injecting privileged fields into API bodies silently escalates account permissions."
+        "summary": "Injecting privileged fields into API bodies silently escalates account permissions.",
+        "cvss_vector": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score":  8.1,
     },
     "CORS — Evil Origin + Credentials": {
         "id":      "T1185",
         "name":    "Browser Session Hijacking",
         "tactic":  "Collection",
         "url":     "https://attack.mitre.org/techniques/T1185/",
-        "summary": "Misconfigured CORS allows malicious sites to make authenticated requests on behalf of victims."
+        "summary": "Misconfigured CORS allows malicious sites to make authenticated requests on behalf of victims.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N",
+        "cvss_score":  8.8,
     },
     "CORS — Evil Origin Reflected": {
         "id":      "T1185",
         "name":    "Browser Session Hijacking",
         "tactic":  "Collection",
         "url":     "https://attack.mitre.org/techniques/T1185/",
-        "summary": "Reflected origin enables cross-origin data reads from malicious sites."
+        "summary": "Reflected origin enables cross-origin data reads from malicious sites.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score":  6.1,
     },
     "CORS — Wildcard + Credentials": {
         "id":      "T1185",
         "name":    "Browser Session Hijacking",
         "tactic":  "Collection",
         "url":     "https://attack.mitre.org/techniques/T1185/",
-        "summary": "Wildcard CORS with credentials undermines same-origin security policy."
+        "summary": "Wildcard CORS with credentials undermines same-origin security policy.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score":  6.1,
     },
     "Missing Header: Content-Security-Policy": {
         "id":      "T1059.007",
         "name":    "JavaScript (XSS enablement)",
         "tactic":  "Execution",
         "url":     "https://attack.mitre.org/techniques/T1059/007/",
-        "summary": "Absent CSP allows injected scripts to execute without browser-level restriction."
+        "summary": "Absent CSP allows injected scripts to execute without browser-level restriction.",
+        "cvss_vector": "AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score":  4.7,
     },
     "Missing Header: Strict-Transport-Security": {
         "id":      "T1557",
         "name":    "Adversary-in-the-Middle",
         "tactic":  "Collection",
         "url":     "https://attack.mitre.org/techniques/T1557/",
-        "summary": "Missing HSTS enables protocol downgrade attacks intercepting plaintext traffic."
+        "summary": "Missing HSTS enables protocol downgrade attacks intercepting plaintext traffic.",
+        "cvss_vector": "AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N",
+        "cvss_score":  6.8,
     },
     "Missing Header: X-Frame-Options": {
         "id":      "T1185",
         "name":    "Browser Session Hijacking",
         "tactic":  "Collection",
         "url":     "https://attack.mitre.org/techniques/T1185/",
-        "summary": "Missing framing protection enables clickjacking attacks on authenticated users."
+        "summary": "Missing framing protection enables clickjacking attacks on authenticated users.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "cvss_score":  6.1,
     },
     "Missing Header: X-Content-Type-Options": {
         "id":      "T1059",
         "name":    "Command and Scripting Interpreter",
         "tactic":  "Execution",
         "url":     "https://attack.mitre.org/techniques/T1059/",
-        "summary": "MIME sniffing can cause browsers to execute non-script responses as scripts."
+        "summary": "MIME sniffing can cause browsers to execute non-script responses as scripts.",
+        "cvss_vector": "AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N",
+        "cvss_score":  4.2,
     },
     "Missing Header: Permissions-Policy": {
         "id":      "T1185",
         "name":    "Browser Session Hijacking",
         "tactic":  "Collection",
         "url":     "https://attack.mitre.org/techniques/T1185/",
-        "summary": "Unrestricted browser features expose users to surveillance via camera, mic, or location."
+        "summary": "Unrestricted browser features expose users to surveillance via camera, mic, or location.",
+        "cvss_vector": "AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N",
+        "cvss_score":  3.1,
     },
     "Missing Header: Referrer-Policy": {
         "id":      "T1040",
         "name":    "Network Sniffing",
         "tactic":  "Discovery",
         "url":     "https://attack.mitre.org/techniques/T1040/",
-        "summary": "Sensitive URL fragments leak via Referer header to third-party resources."
+        "summary": "Sensitive URL fragments leak via Referer header to third-party resources.",
+        "cvss_vector": "AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N",
+        "cvss_score":  3.1,
+    },
+    "SSRF": {
+        "id":      "T1090",
+        "name":    "Proxy",
+        "tactic":  "Command and Control",
+        "url":     "https://attack.mitre.org/techniques/T1090/",
+        "summary": "Server-side requests to internal endpoints allow adversaries to pivot into internal networks.",
+        "cvss_vector": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "cvss_score":  10.0,
     },
 }
 
 
 def get(category):
-    """
-    Return the MITRE entry for a given finding category.
-    Falls back to a generic entry if not found.
-    """
     return MITRE_MAP.get(category, {
-        "id":      "N/A",
-        "name":    "Not mapped",
-        "tactic":  "N/A",
-        "url":     "https://attack.mitre.org",
-        "summary": ""
+        "id":           "N/A",
+        "name":         "Not mapped",
+        "tactic":       "N/A",
+        "url":          "https://attack.mitre.org",
+        "summary":      "",
+        "cvss_vector":  "N/A",
+        "cvss_score":   0.0,
     })
+
+# ── v6 additions ──────────────────────────────────────────────────────────────
+MITRE_MAP.update({
+    "API Discovery": {
+        "id":           "T1592",
+        "name":         "Gather Victim Host Information",
+        "tactic":       "Reconnaissance",
+        "url":          "https://attack.mitre.org/techniques/T1592/",
+        "summary":      "Undocumented API surface makes reconnaissance easier for attackers.",
+        "cvss_vector":  "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score":   5.3,
+    },
+    "OAuth — Redirect URI Manipulation": {
+        "id":           "T1550.001",
+        "name":         "Use Alternate Authentication Material: Application Access Token",
+        "tactic":       "Defense Evasion / Lateral Movement",
+        "url":          "https://attack.mitre.org/techniques/T1550/001/",
+        "summary":      "Manipulated redirect_uri allows stealing auth codes via attacker-controlled endpoint.",
+        "cvss_vector":  "AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N",
+        "cvss_score":   9.3,
+    },
+    "OAuth — Missing State Parameter (CSRF)": {
+        "id":           "T1539",
+        "name":         "Steal Web Session Cookie",
+        "tactic":       "Credential Access",
+        "url":          "https://attack.mitre.org/techniques/T1539/",
+        "summary":      "Missing state param enables CSRF attacks that initiate OAuth flows on behalf of victims.",
+        "cvss_vector":  "AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+        "cvss_score":   8.1,
+    },
+    "OAuth — Token Accepted in URL Parameter": {
+        "id":           "T1528",
+        "name":         "Steal Application Access Token",
+        "tactic":       "Credential Access",
+        "url":          "https://attack.mitre.org/techniques/T1528/",
+        "summary":      "Tokens in URL params are logged by servers, proxies, and browser history.",
+        "cvss_vector":  "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "cvss_score":   7.5,
+    },
+    "OAuth / SSO": {
+        "id":           "T1528",
+        "name":         "Steal Application Access Token",
+        "tactic":       "Credential Access",
+        "url":          "https://attack.mitre.org/techniques/T1528/",
+        "summary":      "OAuth / SSO implementation flaws enable token theft and account takeover.",
+        "cvss_vector":  "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score":   9.1,
+    },
+    "API Versioning — Unprotected Old Version": {
+        "id":           "T1190",
+        "name":         "Exploit Public-Facing Application",
+        "tactic":       "Initial Access",
+        "url":          "https://attack.mitre.org/techniques/T1190/",
+        "summary":      "Deprecated API versions bypass auth and security controls still present in current version.",
+        "cvss_vector":  "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "cvss_score":   9.8,
+    },
+    "API Versioning — Different Auth Behavior": {
+        "id":           "T1190",
+        "name":         "Exploit Public-Facing Application",
+        "tactic":       "Initial Access",
+        "url":          "https://attack.mitre.org/techniques/T1190/",
+        "summary":      "Old API version has weaker security controls than current version.",
+        "cvss_vector":  "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+        "cvss_score":   8.2,
+    },
+    "API Versioning": {
+        "id":           "T1190",
+        "name":         "Exploit Public-Facing Application",
+        "tactic":       "Initial Access",
+        "url":          "https://attack.mitre.org/techniques/T1190/",
+        "summary":      "API version management tested — no unprotected legacy endpoints found.",
+        "cvss_vector":  "N/A",
+        "cvss_score":   0.0,
+    },
+    "Timing Attack — Username Enumeration": {
+        "id":           "T1110.003",
+        "name":         "Brute Force: Password Spraying",
+        "tactic":       "Credential Access",
+        "url":          "https://attack.mitre.org/techniques/T1110/003/",
+        "summary":      "Response timing differences leak which usernames are valid, enabling targeted attacks.",
+        "cvss_vector":  "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "cvss_score":   3.7,
+    },
+    "TLS — HTTP Only (localhost)": {
+        "id":           "T1557",
+        "name":         "Adversary-in-the-Middle",
+        "tactic":       "Collection",
+        "url":          "https://attack.mitre.org/techniques/T1557/",
+        "summary":      "No TLS in development environment — ensure production uses HTTPS.",
+        "cvss_vector":  "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+        "cvss_score":   4.8,
+    },
+    "TLS — No HTTPS": {
+        "id":           "T1557",
+        "name":         "Adversary-in-the-Middle",
+        "tactic":       "Collection",
+        "url":          "https://attack.mitre.org/techniques/T1557/",
+        "summary":      "Unencrypted HTTP allows interception of all traffic including credentials.",
+        "cvss_vector":  "AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score":   6.8,
+    },
+    "TLS — Deprecated Protocol (TLSv1)": {
+        "id":           "T1557",
+        "name":         "Adversary-in-the-Middle",
+        "tactic":       "Collection",
+        "url":          "https://attack.mitre.org/techniques/T1557/",
+        "summary":      "Deprecated TLS version vulnerable to known protocol downgrade attacks.",
+        "cvss_vector":  "AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "cvss_score":   7.4,
+    },
+    "TLS — Missing HSTS Header": {
+        "id":           "T1557",
+        "name":         "Adversary-in-the-Middle",
+        "tactic":       "Collection",
+        "url":          "https://attack.mitre.org/techniques/T1557/",
+        "summary":      "Without HSTS browsers may connect over HTTP, enabling protocol downgrade.",
+        "cvss_vector":  "AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N",
+        "cvss_score":   6.8,
+    },
+    "TLS — Certificate Expiry": {
+        "id":           "T1557",
+        "name":         "Adversary-in-the-Middle",
+        "tactic":       "Collection",
+        "url":          "https://attack.mitre.org/techniques/T1557/",
+        "summary":      "Expired certificate breaks HTTPS trust chain — browsers warn or block access.",
+        "cvss_vector":  "AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:N",
+        "cvss_score":   6.5,
+    },
+    "TLS / SSL": {
+        "id":           "T1557",
+        "name":         "Adversary-in-the-Middle",
+        "tactic":       "Collection",
+        "url":          "https://attack.mitre.org/techniques/T1557/",
+        "summary":      "TLS configuration reviewed — no issues found.",
+        "cvss_vector":  "N/A",
+        "cvss_score":   0.0,
+    },
+    "Business Logic — Negative Values Accepted": {
+        "id":           "T1565",
+        "name":         "Data Manipulation",
+        "tactic":       "Impact",
+        "url":          "https://attack.mitre.org/techniques/T1565/",
+        "summary":      "Negative values corrupt business logic — point farming or data manipulation possible.",
+        "cvss_vector":  "AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+        "cvss_score":   6.5,
+    },
+    "Business Logic — Integer Overflow (Server Error)": {
+        "id":           "T1565",
+        "name":         "Data Manipulation",
+        "tactic":       "Impact",
+        "url":          "https://attack.mitre.org/techniques/T1565/",
+        "summary":      "Integer overflow crashes the server — availability impact.",
+        "cvss_vector":  "AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:H",
+        "cvss_score":   7.1,
+    },
+    "Business Logic — Integer Overflow (Accepted)": {
+        "id":           "T1565",
+        "name":         "Data Manipulation",
+        "tactic":       "Impact",
+        "url":          "https://attack.mitre.org/techniques/T1565/",
+        "summary":      "Extreme integer values accepted without validation — database column overflow risk.",
+        "cvss_vector":  "AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+        "cvss_score":   6.5,
+    },
+    "Business Logic — Zero Duration Earns Points": {
+        "id":           "T1565",
+        "name":         "Data Manipulation",
+        "tactic":       "Impact",
+        "url":          "https://attack.mitre.org/techniques/T1565/",
+        "summary":      "Zero-duration activities that award points enable point farming.",
+        "cvss_vector":  "AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+        "cvss_score":   6.5,
+    },
+    "Business Logic — Future Timestamps Accepted": {
+        "id":           "T1565",
+        "name":         "Data Manipulation",
+        "tactic":       "Impact",
+        "url":          "https://attack.mitre.org/techniques/T1565/",
+        "summary":      "Future timestamps allow pre-logging activities and challenge manipulation.",
+        "cvss_vector":  "AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N",
+        "cvss_score":   4.3,
+    },
+    "Business Logic — Race Condition (Duplicate Submission)": {
+        "id":           "T1565",
+        "name":         "Data Manipulation",
+        "tactic":       "Impact",
+        "url":          "https://attack.mitre.org/techniques/T1565/",
+        "summary":      "Race condition allows duplicate point earning by sending parallel requests.",
+        "cvss_vector":  "AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N",
+        "cvss_score":   5.3,
+    },
+    "Business Logic": {
+        "id":           "T1565",
+        "name":         "Data Manipulation",
+        "tactic":       "Impact",
+        "url":          "https://attack.mitre.org/techniques/T1565/",
+        "summary":      "Business logic tested — no manipulation vulnerabilities found.",
+        "cvss_vector":  "N/A",
+        "cvss_score":   0.0,
+    },
+})

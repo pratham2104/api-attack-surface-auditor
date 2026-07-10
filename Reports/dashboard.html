@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Attack Surface Auditor — Security Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: #0a0a0a; color: #c9c9c9; padding: 0; }
+
+  /* Header */
+  .dash-header { background: #111; border-bottom: 1px solid #222;
+                  padding: 20px 28px; display: flex; align-items: center;
+                  justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .dash-title { font-size: 18px; font-weight: 600; color: #fff; }
+  .dash-title span { color: #e67e00; }
+  .dash-meta { font-size: 12px; color: #555; line-height: 1.8; }
+
+  /* Grid */
+  .grid { display: grid; gap: 14px; padding: 20px 28px; }
+  .row-4 { grid-template-columns: repeat(4, 1fr); }
+  .row-3 { grid-template-columns: repeat(3, 1fr); }
+  .row-2 { grid-template-columns: repeat(2, 1fr); }
+  .row-1 { grid-template-columns: 1fr; }
+
+  /* Panels */
+  .panel { background: #111; border: 1px solid #1e1e1e; border-radius: 8px;
+             padding: 16px; }
+  .panel-title { font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;
+                  letter-spacing: 0.08em; margin-bottom: 12px; }
+
+  /* KPI cards */
+  .kpi { text-align: center; padding: 20px 16px; }
+  .kpi-num { font-size: 40px; font-weight: 700; line-height: 1; }
+  .kpi-label { font-size: 11px; color: #555; text-transform: uppercase;
+                letter-spacing: 0.06em; margin-top: 6px; }
+
+  /* Charts */
+  .chart-wrap { position: relative; height: 220px; }
+
+  /* OWASP table */
+  .owasp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .owasp-table th { color: #555; font-size: 10px; text-transform: uppercase;
+                     letter-spacing: 0.05em; padding: 6px 8px; text-align: left;
+                     border-bottom: 1px solid #222; }
+  .owasp-table td { padding: 7px 8px; border-bottom: 1px solid #1a1a1a; }
+  .owasp-table tr:last-child td { border-bottom: none; }
+  .status-vuln { color: #ff4444; font-weight: 600; font-size: 11px; }
+  .status-safe { color: #00cc66; font-size: 11px; }
+
+  /* Findings table */
+  .findings-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .findings-table th { color: #555; font-size: 10px; text-transform: uppercase;
+                        letter-spacing: 0.05em; padding: 8px 10px; text-align: left;
+                        border-bottom: 1px solid #222; white-space: nowrap; }
+  .findings-table td { padding: 9px 10px; border-bottom: 1px solid #1a1a1a;
+                        vertical-align: top; }
+  .findings-table tr:last-child td { border-bottom: none; }
+  .sev-badge { font-size: 10px; font-weight: 700; padding: 2px 8px;
+                border-radius: 3px; white-space: nowrap; }
+  .cat { font-weight: 500; color: #ddd; }
+  .mono { font-family: monospace; color: #aaa; }
+  .detail-cell { color: #777; font-size: 11px; max-width: 300px; }
+
+  /* Timeline */
+  .timeline { display: flex; flex-direction: column; gap: 8px; }
+  .tl-item { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .tl-text { color: #aaa; }
+
+  /* Footer */
+  .footer { padding: 16px 28px; font-size: 11px; color: #333;
+             border-top: 1px solid #1a1a1a; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="dash-header">
+  <div>
+    <div class="dash-title">API Attack Surface Auditor <span>v6.0</span> — Security Dashboard</div>
+    <div class="dash-meta" style="margin-top:6px;">
+      Target: http://localhost:3001 &nbsp;·&nbsp;
+      Scan: 2026-07-10 20:33 UTC &nbsp;·&nbsp;
+      17 checks run
+    </div>
+  </div>
+  <div style="font-size:11px;color:#444;text-align:right;">
+    github.com/pratham2104/api-attack-surface-auditor<br>
+    Pratham Agarwal — CS &amp; Data Science, CMU
+  </div>
+</div>
+
+<!-- Row 1: KPI cards -->
+<div class="grid row-4">
+  <div class="panel kpi">
+    <div class="kpi-num" style="color:#ff4444;">8</div>
+    <div class="kpi-label">Vulnerabilities</div>
+  </div>
+  <div class="panel kpi">
+    <div class="kpi-num" style="color:#ff4444;">2</div>
+    <div class="kpi-label">Critical</div>
+  </div>
+  <div class="panel kpi">
+    <div class="kpi-num" style="color:#00cc66;">9</div>
+    <div class="kpi-label">Passed</div>
+  </div>
+  <div class="panel kpi">
+    <div class="kpi-num" style="color:#888;">17</div>
+    <div class="kpi-label">Total Checks</div>
+  </div>
+</div>
+
+<!-- Row 2: Charts -->
+<div class="grid row-3">
+  <div class="panel">
+    <div class="panel-title">Findings by severity</div>
+    <div class="chart-wrap">
+      <canvas id="sevChart"></canvas>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">MITRE ATT&amp;CK tactics</div>
+    <div class="chart-wrap">
+      <canvas id="tacticChart"></canvas>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">OWASP API Top 10 coverage</div>
+    <table class="owasp-table">
+      <tr><th>Category</th><th>Status</th></tr>
+      <tr><td>API1 — BOLA</td><td class="status-safe">PASS</td></tr><tr><td>API10 — SQLi/Injection</td><td class="status-vuln">VULN (2)</td></tr><tr><td>API2 — Auth</td><td class="status-vuln">VULN (1)</td></tr><tr><td>API3 — Property</td><td class="status-safe">PASS</td></tr><tr><td>API4 — Rate Limit</td><td class="status-vuln">VULN (1)</td></tr><tr><td>API6 — Business</td><td class="status-safe">PASS</td></tr><tr><td>API7 — SSRF</td><td class="status-safe">PASS</td></tr><tr><td>API8 — Misconfig</td><td class="status-vuln">VULN (4)</td></tr><tr><td>API9 — Inventory</td><td class="status-safe">PASS</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- Row 3: Severity bar + Timeline -->
+<div class="grid row-2">
+  <div class="panel">
+    <div class="panel-title">OWASP coverage — vulnerability count</div>
+    <div class="chart-wrap">
+      <canvas id="owaspChart"></canvas>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Findings timeline</div>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-dot" style="background:#ff4444;"></div><div class="tl-text"><strong style="color:#ff4444;">[Critical]</strong> SQL Injection</div></div><div class="tl-item"><div class="tl-dot" style="background:#ff4444;"></div><div class="tl-text"><strong style="color:#ff4444;">[Critical]</strong> SQL Injection</div></div><div class="tl-item"><div class="tl-dot" style="background:#ff8800;"></div><div class="tl-text"><strong style="color:#ff8800;">[High]</strong> Missing Header: Content-Security-Policy</div></div><div class="tl-item"><div class="tl-dot" style="background:#ffcc00;"></div><div class="tl-text"><strong style="color:#ffcc00;">[Medium]</strong> Missing Rate Limiting</div></div><div class="tl-item"><div class="tl-dot" style="background:#00cc66;"></div><div class="tl-text"><strong style="color:#00cc66;">[Low]</strong> API Discovery</div></div><div class="tl-item"><div class="tl-dot" style="background:#00cc66;"></div><div class="tl-text"><strong style="color:#00cc66;">[Low]</strong> Missing Header: Permissions-Policy</div></div><div class="tl-item"><div class="tl-dot" style="background:#4488ff;"></div><div class="tl-text"><strong style="color:#4488ff;">[Info]</strong> Missing Auth</div></div><div class="tl-item"><div class="tl-dot" style="background:#4488ff;"></div><div class="tl-text"><strong style="color:#4488ff;">[Info]</strong> TLS — HTTP Only (localhost)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 4: Full findings table -->
+<div class="grid row-1">
+  <div class="panel">
+    <div class="panel-title">Vulnerability details (8 findings)</div>
+    <table class="findings-table">
+      <tr>
+        <th>Severity</th>
+        <th>Category</th>
+        <th>MITRE ID</th>
+        <th>Technique</th>
+        <th>CVSS</th>
+        <th>Detail</th>
+      </tr>
+      
+        <tr>
+          <td><span class="sev-badge" style="background:#ff4444;color:#000;">Critical</span></td>
+          <td class="cat">SQL Injection</td>
+          <td class="mono">T1190</td>
+          <td>Exploit Public-Facing Application</td>
+          <td class="mono">9.8</td>
+          <td class="detail-cell">500 error on GET /api/activities with payload in field 'limit'...</td>
+        </tr>
+        <tr>
+          <td><span class="sev-badge" style="background:#ff4444;color:#000;">Critical</span></td>
+          <td class="cat">SQL Injection</td>
+          <td class="mono">T1190</td>
+          <td>Exploit Public-Facing Application</td>
+          <td class="mono">9.8</td>
+          <td class="detail-cell">500 error on GET /api/activities with payload in field 'page'...</td>
+        </tr>
+        <tr>
+          <td><span class="sev-badge" style="background:#ff8800;color:#000;">High</span></td>
+          <td class="cat">Missing Header: Content-Security-Policy</td>
+          <td class="mono">T1059.007</td>
+          <td>JavaScript (XSS enablement)</td>
+          <td class="mono">4.7</td>
+          <td class="detail-cell">'Content-Security-Policy' absent on: /api/health, /api/activities, /api/notifications. Prevents XSS by controlling which...</td>
+        </tr>
+        <tr>
+          <td><span class="sev-badge" style="background:#ffcc00;color:#000;">Medium</span></td>
+          <td class="cat">Missing Rate Limiting</td>
+          <td class="mono">T1110</td>
+          <td>Brute Force</td>
+          <td class="mono">5.3</td>
+          <td class="detail-cell">50 rapid login attempts completed with no 429 — brute-force is unrestricted...</td>
+        </tr>
+        <tr>
+          <td><span class="sev-badge" style="background:#00cc66;color:#000;">Low</span></td>
+          <td class="cat">API Discovery</td>
+          <td class="mono">T1592</td>
+          <td>Gather Victim Host Information</td>
+          <td class="mono">5.3</td>
+          <td class="detail-cell">No OpenAPI spec found at any of 12 common paths — API surface is undocumented, making security review harder....</td>
+        </tr>
+        <tr>
+          <td><span class="sev-badge" style="background:#00cc66;color:#000;">Low</span></td>
+          <td class="cat">Missing Header: Permissions-Policy</td>
+          <td class="mono">T1185</td>
+          <td>Browser Session Hijacking</td>
+          <td class="mono">3.1</td>
+          <td class="detail-cell">'Permissions-Policy' absent on: /api/health, /api/activities, /api/notifications. Restricts browser features (camera, mi...</td>
+        </tr>
+        <tr>
+          <td><span class="sev-badge" style="background:#4488ff;color:#000;">Info</span></td>
+          <td class="cat">Missing Auth</td>
+          <td class="mono">T1078</td>
+          <td>Valid Accounts</td>
+          <td class="mono">5.3</td>
+          <td class="detail-cell">/api/health returns 200 with no token (intentionally public — accepted risk)...</td>
+        </tr>
+        <tr>
+          <td><span class="sev-badge" style="background:#4488ff;color:#000;">Info</span></td>
+          <td class="cat">TLS — HTTP Only (localhost)</td>
+          <td class="mono">T1557</td>
+          <td>Adversary-in-the-Middle</td>
+          <td class="mono">4.8</td>
+          <td class="detail-cell">Target is running over HTTP on localhost — expected for development. Ensure production deployment uses HTTPS with a vali...</td>
+        </tr>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by API Attack Surface Auditor v6.0 &nbsp;·&nbsp;
+  github.com/pratham2104/api-attack-surface-auditor &nbsp;·&nbsp;
+  Pratham Agarwal — Computer Science &amp; Data Science, Central Michigan University
+</div>
+
+<script>
+const chartDefaults = {
+  plugins: { legend: { labels: { color: '#888', font: { size: 11 } } } },
+  scales: { x: { ticks: { color: '#666' }, grid: { color: '#1a1a1a' } },
+             y: { ticks: { color: '#666' }, grid: { color: '#1a1a1a' } } }
+};
+
+// Severity pie
+new Chart(document.getElementById('sevChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ["Critical", "High", "Medium", "Low", "Info"],
+    datasets: [{
+      data: [2, 1, 1, 2, 2],
+      backgroundColor: ["#ff4444", "#ff8800", "#ffcc00", "#00cc66", "#4488ff"],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    plugins: { legend: { position: 'right', labels: { color: '#888', font: { size: 11 } } } },
+    cutout: '65%',
+  }
+});
+
+// Tactic bar
+new Chart(document.getElementById('tacticChart'), {
+  type: 'bar',
+  data: {
+    labels: ["Initial Access", "Execution", "Credential Access", "Reconnaissance", "Collection", "Defense Evasion / Persistence"],
+    datasets: [{
+      label: 'Findings',
+      data: [2, 1, 1, 1, 2, 1],
+      backgroundColor: '#e67e00',
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#666' }, grid: { color: '#1a1a1a' } },
+      y: { ticks: { color: '#888', font: { size: 11 } }, grid: { color: '#1a1a1a' } }
+    }
+  }
+});
+
+// OWASP bar
+new Chart(document.getElementById('owaspChart'), {
+  type: 'bar',
+  data: {
+    labels: ["API1 \u2014 BOLA", "API6 \u2014 Business", "API8 \u2014 Misconfig", "API3 \u2014 Property", "API7 \u2014 SSRF", "API4 \u2014 Rate Limit", "API2 \u2014 Auth", "API10 \u2014 SQLi/Injection", "API9 \u2014 Inventory"],
+    datasets: [{
+      label: 'Vulnerabilities',
+      data: [0, 0, 4, 0, 0, 1, 1, 2, 0],
+      backgroundColor: ["#1a3d1a", "#1a3d1a", "#ff4444", "#1a3d1a", "#1a3d1a", "#ff4444", "#ff4444", "#ff4444", "#1a3d1a"],
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#666', font: { size: 10 } }, grid: { color: '#1a1a1a' } },
+      y: { ticks: { color: '#666' }, grid: { color: '#1a1a1a' } }
+    }
+  }
+});
+</script>
+</body>
+</html>

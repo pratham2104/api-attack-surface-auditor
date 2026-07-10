@@ -1,23 +1,20 @@
 """
 scanner/cors.py
-CORS misconfiguration test — v6 update.
-Uses discovered routes from api_map.
+CORS misconfiguration test — async version.
 """
 
-EVIL_ORIGIN       = "https://evil.com"
-FALLBACK_ROUTES   = ["/api/users", "/api/activities", "/api/admin"]
+EVIL_ORIGIN  = "https://evil.com"
+PROBE_ROUTES = ["/api/users", "/api/activities", "/api/admin"]
 
 
-async def run(client, base_url, token_a, api_map, **kwargs):
-    probe_routes = api_map.get("routes", FALLBACK_ROUTES)[:4]
-
-    print("\n[7/15] CORS misconfiguration")
-    print(f"       Sending Origin: {EVIL_ORIGIN} on {len(probe_routes)} discovered routes\n")
+async def run(client, base_url, token_a, **kwargs):
+    print("\n[7/8] CORS misconfiguration")
+    print(f"      Sending Origin: {EVIL_ORIGIN} — checking if server reflects it\n")
 
     findings  = []
     vuln_found = False
 
-    for route in probe_routes:
+    for route in PROBE_ROUTES:
         try:
             r = await client.get(
                 f"{base_url}{route}",
@@ -26,7 +23,7 @@ async def run(client, base_url, token_a, api_map, **kwargs):
                     "Origin":        EVIL_ORIGIN,
                 }
             )
-            print(f"  GET {route:<40} → {r.status_code}")
+            print(f"  GET {route:<35} → {r.status_code}")
 
             acao = r.headers.get("Access-Control-Allow-Origin", "")
             acac = r.headers.get("Access-Control-Allow-Credentials", "")
@@ -61,16 +58,16 @@ async def run(client, base_url, token_a, api_map, **kwargs):
                     "category": "CORS — Wildcard + Credentials",
                     "severity": "Medium",
                     "owasp":    "API8:2023 — Security Misconfiguration",
-                    "detail":   f"Wildcard CORS with credentials at {route}",
+                    "detail":   f"Wildcard origin with credentials at {route}",
                     "request":  f"GET {base_url}{route}  Origin: {EVIL_ORIGIN}",
                     "response": f"ACAO: *  |  ACAC: {acac}",
                 })
                 vuln_found = True
             else:
-                print(f"    ACAO: '{acao or 'not set'}'")
+                print(f"    ACAO: '{acao or 'not set'}'  ACAC: '{acac or 'not set'}'")
 
         except Exception as e:
-            print(f"  GET {route:<40} → ERROR: {e}")
+            print(f"  GET {route:<35} → ERROR: {e}")
 
     if not vuln_found:
         print("\n  ✓ No CORS misconfigurations detected")

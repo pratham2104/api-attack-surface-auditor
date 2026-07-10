@@ -1,7 +1,9 @@
 """
 reporter/html_report.py
 Generates a self-contained HTML security report from scanner findings.
-v5: now includes CVSS v3.1 vector strings and numeric scores per finding.
+Styled like a real pentest deliverable — severity color coding, MITRE ATT&CK
+technique IDs, CVSS-style severity badges, OWASP categories, remediation notes.
+Output is a single .html file with no external dependencies.
 """
 
 import os
@@ -14,6 +16,14 @@ SEVERITY_COLORS = {
     "Medium":   {"bg": "#3d3100", "border": "#ffcc00", "badge": "#ffcc00", "text": "#ffe566"},
     "Low":      {"bg": "#003d1a", "border": "#00cc66", "badge": "#00cc66", "text": "#66ffaa"},
     "Info":     {"bg": "#001a3d", "border": "#4488ff", "badge": "#4488ff", "text": "#88bbff"},
+}
+
+CVSS_SCORES = {
+    "Critical": "9.0 — 10.0",
+    "High":     "7.0 — 8.9",
+    "Medium":   "4.0 — 6.9",
+    "Low":      "0.1 — 3.9",
+    "Info":     "0.0",
 }
 
 OUTPUT_PATH = os.path.expanduser("~/Desktop/lab/scan_report.html")
@@ -35,18 +45,16 @@ def _finding_card(finding, index):
             </div>
         </div>"""
 
-    sev    = finding.get("severity", "Info")
+    sev = finding.get("severity", "Info")
     colors = SEVERITY_COLORS.get(sev, SEVERITY_COLORS["Info"])
-    mitre  = mitre_map.get(finding["category"])
-    cvss_vector = mitre.get("cvss_vector", "N/A")
-    cvss_score  = mitre.get("cvss_score", 0.0)
+    mitre = mitre_map.get(finding["category"])
 
     return f"""
     <div class="card vuln" style="border-color:{colors['border']};background:{colors['bg']};">
         <div class="card-header" onclick="toggleCard({index})">
             <span class="badge" style="background:{colors['badge']};color:#000;">{sev.upper()}</span>
             <span class="card-title" style="color:{colors['text']};">{finding['category']}</span>
-            <span class="cvss-score">CVSS {cvss_score}</span>
+            <span class="cvss-score">CVSS {CVSS_SCORES.get(sev, 'N/A')}</span>
             <span class="chevron" id="chev-{index}">▼</span>
         </div>
         <div class="card-body" id="body-{index}">
@@ -64,10 +72,6 @@ def _finding_card(finding, index):
                 <div class="meta-item">
                     <span class="meta-label">Tactic</span>
                     <span class="meta-value">{mitre['tactic']}</span>
-                </div>
-                <div class="meta-item">
-                    <span class="meta-label">CVSS v3.1 Vector</span>
-                    <span class="meta-value cvss-vector">{cvss_vector}</span>
                 </div>
             </div>
             <div class="detail-section">
@@ -91,9 +95,9 @@ def _finding_card(finding, index):
 
 
 def generate(findings, base_url="http://localhost:3001", output_path=OUTPUT_PATH):
-    vulns     = sorted([f for f in findings if f["status"] == "VULNERABLE"], key=_severity_order)
-    safes     = [f for f in findings if f["status"] == "SAFE"]
-    total     = len(findings)
+    vulns  = sorted([f for f in findings if f["status"] == "VULNERABLE"], key=_severity_order)
+    safes  = [f for f in findings if f["status"] == "SAFE"]
+    total  = len(findings)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     counts = {sev: 0 for sev in SEVERITY_COLORS}
@@ -123,15 +127,19 @@ def generate(findings, base_url="http://localhost:3001", output_path=OUTPUT_PATH
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace; background: #0d0d0d; color: #c9c9c9; padding: 2rem; }}
   a {{ color: inherit; }}
+
   .report-header {{ border-bottom: 1px solid #333; padding-bottom: 1.5rem; margin-bottom: 2rem; }}
   .report-title {{ font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 4px; }}
   .report-meta {{ font-size: 13px; color: #666; }}
   .report-meta span {{ margin-right: 24px; }}
+
   .summary-row {{ display: flex; gap: 12px; margin-bottom: 2rem; flex-wrap: wrap; }}
   .summary-card {{ flex: 1; min-width: 80px; border: 1px solid; border-radius: 8px; padding: 14px; text-align: center; background: #111; }}
   .summary-count {{ font-size: 28px; font-weight: 700; }}
   .summary-label {{ font-size: 11px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }}
+
   .section-title {{ font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; margin-top: 2rem; }}
+
   .card {{ border: 1px solid #333; border-radius: 10px; margin-bottom: 10px; overflow: hidden; }}
   .card-header {{ display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; flex-wrap: wrap; }}
   .card-title {{ font-size: 15px; font-weight: 500; color: #fff; flex: 1; }}
@@ -141,28 +149,33 @@ def generate(findings, base_url="http://localhost:3001", output_path=OUTPUT_PATH
   .cvss-score {{ font-size: 11px; color: #888; flex-shrink: 0; }}
   .chevron {{ font-size: 12px; color: #666; transition: transform 0.2s; flex-shrink: 0; }}
   .chevron.open {{ transform: rotate(180deg); }}
+
   .card-body {{ display: none; padding: 0 16px 16px; border-top: 1px solid #222; }}
   .card-body.open {{ display: block; }}
+
   .meta-row {{ display: flex; gap: 24px; flex-wrap: wrap; padding: 14px 0 10px; border-bottom: 1px solid #1a1a1a; margin-bottom: 14px; }}
   .meta-item {{ display: flex; flex-direction: column; gap: 3px; }}
   .meta-label {{ font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.06em; }}
   .meta-value {{ font-size: 13px; color: #ccc; }}
-  .cvss-vector {{ font-family: monospace; font-size: 12px; color: #aaa; }}
   .mitre-link {{ color: #4488ff; text-decoration: none; }}
   .mitre-link:hover {{ text-decoration: underline; }}
+
   .detail-section {{ margin-bottom: 12px; }}
   .detail-label {{ font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }}
   .detail-value {{ font-size: 13px; color: #bbb; line-height: 1.6; }}
   .code-block {{ font-family: monospace; font-size: 12px; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; padding: 10px 12px; color: #aaa; white-space: pre-wrap; word-break: break-all; line-height: 1.5; }}
   .mitre-summary {{ background: #111; border-left: 3px solid #333; border-radius: 0 6px 6px 0; padding: 10px 14px; }}
+
   .safe.card {{ background: #0a0f0a; border-color: #1a3d1a; }}
   .safe .card-header {{ cursor: default; }}
+
   .footer {{ margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #222; font-size: 12px; color: #444; }}
 </style>
 </head>
 <body>
+
 <div class="report-header">
-  <div class="report-title">API Attack Surface Auditor v5.0 — Scan Report</div>
+  <div class="report-title">API Attack Surface Auditor — Scan Report</div>
   <div class="report-meta">
     <span>Target: {base_url}</span>
     <span>Generated: {timestamp}</span>
@@ -171,19 +184,28 @@ def generate(findings, base_url="http://localhost:3001", output_path=OUTPUT_PATH
     <span>Total checks: {total}</span>
   </div>
 </div>
-<div class="summary-row">{summary_cards}</div>
+
+<div class="summary-row">
+  {summary_cards}
+</div>
+
 <div class="section-title">Vulnerabilities</div>
 {finding_cards if finding_cards else '<div style="color:#555;font-size:13px;padding:12px 0;">No vulnerabilities found.</div>'}
+
 <div class="section-title">Passed checks</div>
 {safe_cards}
+
 <div class="footer">
   Generated by API Attack Surface Auditor · github.com/pratham2104/api-attack-surface-auditor ·
   Pratham Agarwal — Computer Science & Data Science, Central Michigan University
 </div>
+
 <script>
 function toggleCard(i) {{
-  document.getElementById('body-' + i).classList.toggle('open');
-  document.getElementById('chev-' + i).classList.toggle('open');
+  const body = document.getElementById('body-' + i);
+  const chev = document.getElementById('chev-' + i);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
 }}
 </script>
 </body>
@@ -194,4 +216,5 @@ function toggleCard(i) {{
         f.write(html)
 
     print(f"\n  HTML report saved → {output_path}")
+    print("  Open in any browser to view.\n")
     return output_path

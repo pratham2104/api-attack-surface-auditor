@@ -1,0 +1,93 @@
+
+======================================================================
+  API ATTACK SURFACE AUDITOR v6.0 — SCAN REPORT
+  2026-07-10 16:33:36   http://localhost:3001
+======================================================================
+
+  [CRITICAL]  SQL Injection
+  OWASP    : API10:2023 — Unsafe Consumption of APIs
+  MITRE    : T1190 — Exploit Public-Facing Application
+  CVSS     : 9.8  AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+  Detail   : 500 error on GET /api/activities with payload in field 'limit'
+  Request  : GET http://localhost:3001/api/activities  limit="' OR '1'='1"
+  Response : HTTP 500: {"error":"server_error","message":"Failed to fetch activities."}
+
+  [CRITICAL]  SQL Injection
+  OWASP    : API10:2023 — Unsafe Consumption of APIs
+  MITRE    : T1190 — Exploit Public-Facing Application
+  CVSS     : 9.8  AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+  Detail   : 500 error on GET /api/activities with payload in field 'page'
+  Request  : GET http://localhost:3001/api/activities  page="' OR '1'='1"
+  Response : HTTP 500: {"error":"server_error","message":"Failed to fetch activities."}
+
+  [HIGH]  Missing Header: Content-Security-Policy
+  OWASP    : API8:2023 — Security Misconfiguration
+  MITRE    : T1059.007 — JavaScript (XSS enablement)
+  CVSS     : 4.7  AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:L/A:N
+  Detail   : 'Content-Security-Policy' absent on: /api/health, /api/activities, /api/notifications. Prevents XSS by controlling which scripts the browser can load.
+  Request  : GET http://localhost:3001/api/health  (checking response headers)
+  Response : Header 'Content-Security-Policy' not present in response
+
+  [MEDIUM]  Missing Rate Limiting
+  OWASP    : API4:2023 — Unrestricted Resource Consumption
+  MITRE    : T1110 — Brute Force
+  CVSS     : 5.3  AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+  Detail   : 50 rapid login attempts completed with no 429 — brute-force is unrestricted
+  Request  : POST /api/auth/login x50, wrong credentials, no delay
+  Response : No 429 Too Many Requests received across all 50 requests
+
+  [LOW]  API Discovery
+  OWASP    : API8:2023 — Security Misconfiguration
+  MITRE    : T1592 — Gather Victim Host Information
+  CVSS     : 5.3  AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+  Detail   : No OpenAPI spec found at any of 12 common paths — API surface is undocumented, making security review harder.
+  Request  : GET http://localhost:3001/swagger.json (and 11 other paths)
+  Response : No valid spec returned
+
+  [LOW]  Missing Header: Permissions-Policy
+  OWASP    : API8:2023 — Security Misconfiguration
+  MITRE    : T1185 — Browser Session Hijacking
+  CVSS     : 3.1  AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N
+  Detail   : 'Permissions-Policy' absent on: /api/health, /api/activities, /api/notifications. Restricts browser features (camera, mic, geolocation).
+  Request  : GET http://localhost:3001/api/health  (checking response headers)
+  Response : Header 'Permissions-Policy' not present in response
+
+  [INFO]  Missing Auth
+  OWASP    : API2:2023 — Broken Authentication
+  MITRE    : T1078 — Valid Accounts
+  CVSS     : 5.3  AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+  Detail   : /api/health returns 200 with no token (intentionally public — accepted risk)
+  Request  : GET http://localhost:3001/api/health  (no Authorization header)
+  Response : HTTP 200: {"status":"ok","timestamp":"2026-07-10T20:33:31.766Z","uptime":2176,"checks":{"database":"ok","jwt":"ok"}}
+
+  [INFO]  TLS — HTTP Only (localhost)
+  OWASP    : API8:2023 — Security Misconfiguration
+  MITRE    : T1557 — Adversary-in-the-Middle
+  CVSS     : 4.8  AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N
+  Detail   : Target is running over HTTP on localhost — expected for development. Ensure production deployment uses HTTPS with a valid certificate.
+  Request  : Scheme check: http://localhost:3001
+  Response : HTTP (no TLS) — localhost environment
+
+  [SAFE]    BOLA/IDOR
+
+  [SAFE]    JWT Attacks
+
+  [SAFE]    Mass Assignment
+
+  [SAFE]    CORS
+
+  [SAFE]    SSRF
+
+  [SAFE]    OAuth / SSO
+
+  [SAFE]    API Versioning
+
+  [SAFE]    Timing Attack — Username Enumeration
+
+  [SAFE]    Business Logic
+
+======================================================================
+  Vulnerabilities : 8
+  Passed          : 9
+  Total checks    : 17
+======================================================================

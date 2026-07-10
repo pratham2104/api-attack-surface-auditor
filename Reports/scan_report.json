@@ -1,0 +1,325 @@
+{
+  "scan_metadata": {
+    "tool": "API Attack Surface Auditor v5.0",
+    "timestamp": "2026-07-10T20:33:36.347444Z",
+    "target": "http://localhost:3001",
+    "total": 17,
+    "vulnerable": 8,
+    "safe": 9
+  },
+  "findings": [
+    {
+      "status": "VULNERABLE",
+      "category": "SQL Injection",
+      "severity": "Critical",
+      "owasp": "API10:2023 \u2014 Unsafe Consumption of APIs",
+      "mitre": {
+        "technique_id": "T1190",
+        "technique_name": "Exploit Public-Facing Application",
+        "tactic": "Initial Access",
+        "url": "https://attack.mitre.org/techniques/T1190/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "score": 9.8
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z",
+      "detail": "500 error on GET /api/activities with payload in field 'limit'",
+      "request": "GET http://localhost:3001/api/activities  limit=\"' OR '1'='1\"",
+      "response": "HTTP 500: {\"error\":\"server_error\",\"message\":\"Failed to fetch activities.\"}"
+    },
+    {
+      "status": "VULNERABLE",
+      "category": "SQL Injection",
+      "severity": "Critical",
+      "owasp": "API10:2023 \u2014 Unsafe Consumption of APIs",
+      "mitre": {
+        "technique_id": "T1190",
+        "technique_name": "Exploit Public-Facing Application",
+        "tactic": "Initial Access",
+        "url": "https://attack.mitre.org/techniques/T1190/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "score": 9.8
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z",
+      "detail": "500 error on GET /api/activities with payload in field 'page'",
+      "request": "GET http://localhost:3001/api/activities  page=\"' OR '1'='1\"",
+      "response": "HTTP 500: {\"error\":\"server_error\",\"message\":\"Failed to fetch activities.\"}"
+    },
+    {
+      "status": "VULNERABLE",
+      "category": "Missing Header: Content-Security-Policy",
+      "severity": "High",
+      "owasp": "API8:2023 \u2014 Security Misconfiguration",
+      "mitre": {
+        "technique_id": "T1059.007",
+        "technique_name": "JavaScript (XSS enablement)",
+        "tactic": "Execution",
+        "url": "https://attack.mitre.org/techniques/T1059/007/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "score": 4.7
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z",
+      "detail": "'Content-Security-Policy' absent on: /api/health, /api/activities, /api/notifications. Prevents XSS by controlling which scripts the browser can load.",
+      "request": "GET http://localhost:3001/api/health  (checking response headers)",
+      "response": "Header 'Content-Security-Policy' not present in response"
+    },
+    {
+      "status": "VULNERABLE",
+      "category": "Missing Rate Limiting",
+      "severity": "Medium",
+      "owasp": "API4:2023 \u2014 Unrestricted Resource Consumption",
+      "mitre": {
+        "technique_id": "T1110",
+        "technique_name": "Brute Force",
+        "tactic": "Credential Access",
+        "url": "https://attack.mitre.org/techniques/T1110/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "score": 5.3
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z",
+      "detail": "50 rapid login attempts completed with no 429 \u2014 brute-force is unrestricted",
+      "request": "POST /api/auth/login x50, wrong credentials, no delay",
+      "response": "No 429 Too Many Requests received across all 50 requests"
+    },
+    {
+      "status": "VULNERABLE",
+      "category": "API Discovery",
+      "severity": "Low",
+      "owasp": "API8:2023 \u2014 Security Misconfiguration",
+      "mitre": {
+        "technique_id": "T1592",
+        "technique_name": "Gather Victim Host Information",
+        "tactic": "Reconnaissance",
+        "url": "https://attack.mitre.org/techniques/T1592/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "score": 5.3
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z",
+      "detail": "No OpenAPI spec found at any of 12 common paths \u2014 API surface is undocumented, making security review harder.",
+      "request": "GET http://localhost:3001/swagger.json (and 11 other paths)",
+      "response": "No valid spec returned"
+    },
+    {
+      "status": "VULNERABLE",
+      "category": "Missing Header: Permissions-Policy",
+      "severity": "Low",
+      "owasp": "API8:2023 \u2014 Security Misconfiguration",
+      "mitre": {
+        "technique_id": "T1185",
+        "technique_name": "Browser Session Hijacking",
+        "tactic": "Collection",
+        "url": "https://attack.mitre.org/techniques/T1185/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N",
+        "score": 3.1
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z",
+      "detail": "'Permissions-Policy' absent on: /api/health, /api/activities, /api/notifications. Restricts browser features (camera, mic, geolocation).",
+      "request": "GET http://localhost:3001/api/health  (checking response headers)",
+      "response": "Header 'Permissions-Policy' not present in response"
+    },
+    {
+      "status": "VULNERABLE",
+      "category": "Missing Auth",
+      "severity": "Info",
+      "owasp": "API2:2023 \u2014 Broken Authentication",
+      "mitre": {
+        "technique_id": "T1078",
+        "technique_name": "Valid Accounts",
+        "tactic": "Defense Evasion / Persistence",
+        "url": "https://attack.mitre.org/techniques/T1078/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "score": 5.3
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z",
+      "detail": "/api/health returns 200 with no token (intentionally public \u2014 accepted risk)",
+      "request": "GET http://localhost:3001/api/health  (no Authorization header)",
+      "response": "HTTP 200: {\"status\":\"ok\",\"timestamp\":\"2026-07-10T20:33:31.766Z\",\"uptime\":2176,\"checks\":{\"database\":\"ok\",\"jwt\":\"ok\"}}"
+    },
+    {
+      "status": "VULNERABLE",
+      "category": "TLS \u2014 HTTP Only (localhost)",
+      "severity": "Info",
+      "owasp": "API8:2023 \u2014 Security Misconfiguration",
+      "mitre": {
+        "technique_id": "T1557",
+        "technique_name": "Adversary-in-the-Middle",
+        "tactic": "Collection",
+        "url": "https://attack.mitre.org/techniques/T1557/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+        "score": 4.8
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z",
+      "detail": "Target is running over HTTP on localhost \u2014 expected for development. Ensure production deployment uses HTTPS with a valid certificate.",
+      "request": "Scheme check: http://localhost:3001",
+      "response": "HTTP (no TLS) \u2014 localhost environment"
+    },
+    {
+      "status": "SAFE",
+      "category": "BOLA/IDOR",
+      "severity": null,
+      "owasp": "API1:2023 \u2014 Broken Object Level Authorization",
+      "mitre": {
+        "technique_id": "T1083",
+        "technique_name": "File and Directory Discovery",
+        "tactic": "Discovery",
+        "url": "https://attack.mitre.org/techniques/T1083/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+        "score": 6.5
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    },
+    {
+      "status": "SAFE",
+      "category": "JWT Attacks",
+      "severity": null,
+      "owasp": "API2:2023 \u2014 Broken Authentication",
+      "mitre": {
+        "technique_id": "T1528",
+        "technique_name": "Steal Application Access Token",
+        "tactic": "Credential Access",
+        "url": "https://attack.mitre.org/techniques/T1528/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "score": 10.0
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    },
+    {
+      "status": "SAFE",
+      "category": "Mass Assignment",
+      "severity": null,
+      "owasp": "API6:2023 \u2014 Unrestricted Access to Sensitive Business Flows",
+      "mitre": {
+        "technique_id": "T1548",
+        "technique_name": "Abuse Elevation Control Mechanism",
+        "tactic": "Privilege Escalation",
+        "url": "https://attack.mitre.org/techniques/T1548/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
+        "score": 8.1
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    },
+    {
+      "status": "SAFE",
+      "category": "CORS",
+      "severity": null,
+      "owasp": "API8:2023 \u2014 Security Misconfiguration",
+      "mitre": {
+        "technique_id": "N/A",
+        "technique_name": "Not mapped",
+        "tactic": "N/A",
+        "url": "https://attack.mitre.org"
+      },
+      "cvss": {
+        "vector": "N/A",
+        "score": 0.0
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    },
+    {
+      "status": "SAFE",
+      "category": "SSRF",
+      "severity": null,
+      "owasp": "API7:2023 \u2014 Server Side Request Forgery",
+      "mitre": {
+        "technique_id": "T1090",
+        "technique_name": "Proxy",
+        "tactic": "Command and Control",
+        "url": "https://attack.mitre.org/techniques/T1090/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "score": 10.0
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    },
+    {
+      "status": "SAFE",
+      "category": "OAuth / SSO",
+      "severity": null,
+      "owasp": "API2:2023 \u2014 Broken Authentication",
+      "mitre": {
+        "technique_id": "T1528",
+        "technique_name": "Steal Application Access Token",
+        "tactic": "Credential Access",
+        "url": "https://attack.mitre.org/techniques/T1528/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "score": 9.1
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    },
+    {
+      "status": "SAFE",
+      "category": "API Versioning",
+      "severity": null,
+      "owasp": "API9:2023 \u2014 Improper Inventory Management",
+      "mitre": {
+        "technique_id": "T1190",
+        "technique_name": "Exploit Public-Facing Application",
+        "tactic": "Initial Access",
+        "url": "https://attack.mitre.org/techniques/T1190/"
+      },
+      "cvss": {
+        "vector": "N/A",
+        "score": 0.0
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    },
+    {
+      "status": "SAFE",
+      "category": "Timing Attack \u2014 Username Enumeration",
+      "severity": null,
+      "owasp": "API2:2023 \u2014 Broken Authentication",
+      "mitre": {
+        "technique_id": "T1110.003",
+        "technique_name": "Brute Force: Password Spraying",
+        "tactic": "Credential Access",
+        "url": "https://attack.mitre.org/techniques/T1110/003/"
+      },
+      "cvss": {
+        "vector": "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "score": 3.7
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    },
+    {
+      "status": "SAFE",
+      "category": "Business Logic",
+      "severity": null,
+      "owasp": "API3:2023 \u2014 Broken Object Property Level Authorization",
+      "mitre": {
+        "technique_id": "T1565",
+        "technique_name": "Data Manipulation",
+        "tactic": "Impact",
+        "url": "https://attack.mitre.org/techniques/T1565/"
+      },
+      "cvss": {
+        "vector": "N/A",
+        "score": 0.0
+      },
+      "timestamp": "2026-07-10T20:33:36.347444Z"
+    }
+  ]
+}
