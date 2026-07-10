@@ -2,7 +2,6 @@
 scanner/auth.py
 Tests every known endpoint with no Authorization header.
 Flags any endpoint that returns 200 — it should require a token.
-Async version — uses httpx.AsyncClient passed in from main.
 """
 
 KNOWN_ROUTES = [
@@ -18,33 +17,38 @@ KNOWN_ROUTES = [
     "/api/feed",
 ]
 
+# Routes that are intentionally public — flag but mark as accepted risk
 PUBLIC_BY_DESIGN = {"/api/health"}
 
 
-async def run(client, base_url, **kwargs):
+def run(client, base_url, **kwargs):
+    """
+    Hits every known route with no Authorization header.
+    Returns a list of findings dicts.
+    """
     print("\n[1/8] Missing authentication")
     print("      No token — expecting 401/403 on all protected routes\n")
 
-    findings  = []
+    findings = []
     vuln_found = False
 
     for route in KNOWN_ROUTES:
         try:
-            r = await client.get(f"{base_url}{route}")
+            r = client.get(f"{base_url}{route}")
             print(f"  GET {route:<35} → {r.status_code}")
 
             if r.status_code == 200:
                 accepted_risk = route in PUBLIC_BY_DESIGN
                 findings.append({
-                    "status":   "VULNERABLE",
+                    "status": "VULNERABLE",
                     "category": "Missing Auth",
                     "severity": "Info" if accepted_risk else "High",
-                    "owasp":    "API2:2023 — Broken Authentication",
-                    "detail":   (
+                    "owasp": "API2:2023 — Broken Authentication",
+                    "detail": (
                         f"{route} returns 200 with no token"
                         + (" (intentionally public — accepted risk)" if accepted_risk else "")
                     ),
-                    "request":  f"GET {base_url}{route}  (no Authorization header)",
+                    "request": f"GET {base_url}{route}  (no Authorization header)",
                     "response": f"HTTP {r.status_code}: {r.text[:200]}",
                 })
                 vuln_found = True
@@ -55,10 +59,10 @@ async def run(client, base_url, **kwargs):
     if not vuln_found:
         print("\n  ✓ All endpoints returned non-200 without a token")
         findings.append({
-            "status":   "SAFE",
+            "status": "SAFE",
             "category": "Missing Auth",
             "severity": None,
-            "owasp":    "API2:2023 — Broken Authentication",
+            "owasp": "API2:2023 — Broken Authentication",
         })
 
     return findings

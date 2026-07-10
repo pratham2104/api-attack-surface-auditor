@@ -59,7 +59,7 @@
   <div class="report-title">API Attack Surface Auditor — Scan Report</div>
   <div class="report-meta">
     <span>Target: http://localhost:3001</span>
-    <span>Generated: 2026-07-09 20:17:16</span>
+    <span>Generated: 2026-07-09 19:22:20</span>
     <span>Vulnerabilities: 5</span>
     <span>Passed: 4</span>
     <span>Total checks: 9</span>
@@ -113,7 +113,7 @@
             </div>
             <div class="detail-section">
                 <div class="detail-label">Detail</div>
-                <div class="detail-value">500 error on GET /api/activities with payload in field 'limit'</div>
+                <div class="detail-value">500 error on GET /api/activities with payload in field 'limit' — possible unhandled SQL error</div>
             </div>
             <div class="detail-section">
                 <div class="detail-label">Request</div>
@@ -156,7 +156,7 @@
             </div>
             <div class="detail-section">
                 <div class="detail-label">Detail</div>
-                <div class="detail-value">'Content-Security-Policy' absent on: /api/health, /api/activities. Prevents XSS by controlling which scripts the browser can load.</div>
+                <div class="detail-value">'Content-Security-Policy' absent on: /api/health, /api/activities. Prevents XSS by controlling which scripts, styles, and resources the browser can load.</div>
             </div>
             <div class="detail-section">
                 <div class="detail-label">Request</div>
@@ -203,7 +203,7 @@
             </div>
             <div class="detail-section">
                 <div class="detail-label">Request</div>
-                <pre class="code-block">POST /api/auth/login x50, wrong credentials, no delay</pre>
+                <pre class="code-block">POST /api/auth/login x50, wrong credentials, no delay between requests</pre>
             </div>
             <div class="detail-section">
                 <div class="detail-label">Response</div>
@@ -242,7 +242,7 @@
             </div>
             <div class="detail-section">
                 <div class="detail-label">Detail</div>
-                <div class="detail-value">'Permissions-Policy' absent on: /api/health, /api/leaderboard, /api/activities. Restricts browser features (camera, mic, geolocation).</div>
+                <div class="detail-value">'Permissions-Policy' absent on: /api/health, /api/leaderboard, /api/activities. Restricts browser features (camera, mic, geolocation) from being used by the page.</div>
             </div>
             <div class="detail-section">
                 <div class="detail-label">Request</div>
@@ -293,7 +293,7 @@
             </div>
             <div class="detail-section">
                 <div class="detail-label">Response</div>
-                <pre class="code-block">HTTP 200: {"status":"ok","timestamp":"2026-07-10T00:17:15.947Z","uptime":366024,"checks":{"database":"ok","jwt":"ok"}}</pre>
+                <pre class="code-block">HTTP 200: {"status":"ok","timestamp":"2026-07-09T23:22:20.286Z","uptime":362728,"checks":{"database":"ok","jwt":"ok"}}</pre>
             </div>
             <div class="detail-section mitre-summary">
                 <div class="detail-label">ATT&CK context</div>
