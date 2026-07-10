@@ -39,7 +39,7 @@ Scanned against **Move More** — a production corporate wellness platform with 
 
   [HIGH]  Missing Header: Content-Security-Policy
   OWASP    : API8:2023 — Security Misconfiguration
-  Detail   : 'Content-Security-Policy' absent on: /api/health, /api/activities.
+  Detail   : 'Content-Security-Policy' absent on sampled endpoints.
              Prevents XSS by controlling which scripts the browser can load.
 
   [MEDIUM]  Missing Rate Limiting
@@ -70,7 +70,8 @@ Scanned against **Move More** — a production corporate wellness platform with 
 ### Finding 1: SQL injection on `/api/activities` (Critical)
 
 **Severity:** Critical  
-**OWASP:** API10:2023 — Unsafe Consumption of APIs
+**OWASP:** API10:2023 — Unsafe Consumption of APIs  
+**MITRE ATT&CK:** T1190 — Exploit Public-Facing Application
 
 The `limit` query parameter on the activities endpoint was passed unsanitized into a database query. Injecting `' OR '1'='1` caused the server to return HTTP 500 — meaning the payload reached the database layer and caused an unhandled exception.
 
@@ -91,6 +92,7 @@ if (isNaN(limit) || limit < 1 || limit > 100) {
 
 **Severity:** Medium  
 **OWASP:** API4:2023 — Unrestricted Resource Consumption  
+**MITRE ATT&CK:** T1110 — Brute Force  
 **CVSS v3 Score:** 5.3
 
 The login endpoint accepted 50 consecutive authentication attempts with wrong credentials and returned no `429 Too Many Requests`. `express-rate-limit` was installed as a dependency but never wired into the application middleware.
@@ -114,9 +116,10 @@ app.use('/api/auth/login', loginLimiter)
 ### Finding 3: Missing Content-Security-Policy header (High)
 
 **Severity:** High  
-**OWASP:** API8:2023 — Security Misconfiguration
+**OWASP:** API8:2023 — Security Misconfiguration  
+**MITRE ATT&CK:** T1059.007 — JavaScript (XSS enablement)
 
-No `Content-Security-Policy` header was present on any endpoint response. Without CSP, the browser has no restrictions on which scripts, stylesheets, or resources can execute — leaving the app open to XSS attacks if any user input ever reaches the DOM unsanitized.
+No `Content-Security-Policy` header was present on any endpoint response. Without CSP, the browser has no restrictions on which scripts, stylesheets, or resources can execute — leaving the app open to XSS attacks if any user input reaches the DOM unsanitized.
 
 **Remediation:**
 
@@ -126,6 +129,14 @@ app.use((req, res, next) => {
   next()
 })
 ```
+
+---
+
+## HTML report with MITRE ATT&CK mapping
+
+v3.0 generates a self-contained HTML report alongside the plain text output. Every finding includes a clickable MITRE ATT&CK technique ID linked to attack.mitre.org, CVSS severity range, OWASP category, the exact request that triggered the finding, the response, and the ATT&CK tactic context.
+
+The report opens in any browser with no dependencies — one file, fully self-contained.
 
 ---
 
@@ -228,7 +239,9 @@ TOKEN_B   = "paste_high_privilege_token"
 python3 main.py
 ```
 
-Report prints to terminal and saves to `scan_report.txt`.
+Two outputs are generated:
+- `scan_report.txt` — plain text terminal summary
+- `scan_report.html` — full HTML report with MITRE ATT&CK mapping, open in any browser
 
 ---
 
@@ -236,21 +249,25 @@ Report prints to terminal and saves to `scan_report.txt`.
 
 ```
 api-attack-surface-auditor/
-├── main.py                 # entry point — orchestrates all modules
+├── main.py                  # entry point — orchestrates all modules
 ├── requirements.txt
-├── scan_report.txt         # latest scan output
+├── scan_report.txt          # latest plain text scan output
+├── scan_report.html         # latest HTML report with MITRE mapping
 ├── scanner/
-│   ├── auth.py             # missing authentication
-│   ├── bola.py             # BOLA / IDOR
-│   ├── jwt_attacks.py      # alg:none + role tampering
-│   ├── mass_assign.py      # mass assignment
-│   ├── rate_limit.py       # rate limiting
-│   ├── headers.py          # security headers audit
-│   ├── cors.py             # CORS misconfiguration
-│   └── sqli.py             # SQL injection fuzzer
+│   ├── auth.py              # missing authentication
+│   ├── bola.py              # BOLA / IDOR
+│   ├── jwt_attacks.py       # alg:none + role tampering
+│   ├── mass_assign.py       # mass assignment
+│   ├── rate_limit.py        # rate limiting
+│   ├── headers.py           # security headers audit
+│   ├── cors.py              # CORS misconfiguration
+│   └── sqli.py              # SQL injection fuzzer
+├── reporter/
+│   ├── html_report.py       # HTML report generator
+│   └── mitre_map.py         # MITRE ATT&CK technique mappings
 └── v1/
-    ├── fuzz_movmore.py     # original single-file version
-    └── fuzzer_report.txt   # original 2-finding report
+    ├── fuzz_movmore.py      # original single-file version
+    └── fuzzer_report.txt    # original 2-finding report
 ```
 
 ---
@@ -265,6 +282,12 @@ api-attack-surface-auditor/
 ---
 
 ## Changelog
+
+### v3.0
+- Added HTML report generator with severity color coding and expandable finding cards
+- Added MITRE ATT&CK technique mapping for every finding category
+- Each finding now shows technique ID, tactic, and a direct link to attack.mitre.org
+- Two outputs per scan: plain text summary + self-contained HTML report
 
 ### v2.0
 - Refactored into modular package — 8 independent scanner modules
@@ -282,7 +305,7 @@ api-attack-surface-auditor/
 
 ## Tech stack
 
-Python 3 · httpx · base64 · OWASP API Security Top 10 · JWT (RFC 7519) · Express.js target
+Python 3 · httpx · base64 · OWASP API Security Top 10 · MITRE ATT&CK · JWT (RFC 7519) · Express.js target
 
 ---
 
